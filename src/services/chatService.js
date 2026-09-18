@@ -1,52 +1,61 @@
-// src/services/chatService.js
+// This service handles chat responses.
+// Now calls the real backend API instead of the fake sample data.
 
-// Get the backend URL from environment variables, fallback to localhost for local dev
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = 'https://tnea-ai-eng.onrender.com'
 
 export async function sendMessage(question) {
   try {
-    // 1. Call the actual FastAPI /query endpoint
-    const response = await fetch(`${API_BASE_URL}/query`, {
+    const res = await fetch(`${API_BASE_URL}/query`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        question: question,
-        session_id: 'frontend-web-user', // Can be made dynamic later with UUID
-        top_k: 5,
-      }),
-    });
+      body: JSON.stringify({ question }),
+    })
 
-    if (!response.ok) {
-      throw new Error(`Backend returned status ${response.status}`);
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => '')
+      console.error('Backend error:', res.status, errorText)
+
+      return {
+        status: 'no-results',
+        answer:
+          'Something went wrong reaching the college database. Please try again in a moment.',
+        sources: [],
+      }
     }
 
-    const data = await response.json();
+    const data = await res.json()
 
-    // 2. Map backend sources to the format your frontend UI components expect
-    const mappedSources = (data.sources || []).map((src) => ({
-      name: src.college_name || 'TNEA Rules',
-      detail: src.district 
-        ? `${src.district} | TNEA Code: ${src.tnea_code}` 
-        : `TNEA Code: ${src.tnea_code}`,
-    }));
+    // The backend's exact field names may differ slightly (answer / response /
+    // result / message). This tries the common possibilities so the UI doesn't
+    // silently break if the field name isn't exactly "answer".
+    const answerText =
+      data.answer ??
+      data.response ??
+      data.result ??
+      data.message ??
+      'No answer was returned by the server.'
 
-    // 3. Return in the exact format your App.jsx/UI expects
+    const sources = Array.isArray(data.sources)
+      ? data.sources
+      : Array.isArray(data.source_documents)
+      ? data.source_documents
+      : []
+
     return {
-      status: data.answer && data.answer.trim() !== '' ? 'success' : 'no-results',
-      answer: data.answer || 'No matching results were found in the current sample dataset. Try another college, district, or course.',
-      sources: mappedSources,
-    };
-
+      status: 'success',
+      answer: answerText,
+      sources,
+    }
   } catch (error) {
-    console.error('Chat service error:', error);
-    
-    // Fallback UI state if the backend is unreachable
+    console.error('Failed to reach backend:', error)
+
     return {
       status: 'no-results',
-      answer: 'Sorry, I could not connect to the college database. Please ensure the backend API is running and accessible.',
+      answer:
+        'Unable to reach the college database right now. Please check your connection and try again.',
       sources: [],
-    };
+    }
   }
 }
