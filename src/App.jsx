@@ -5,10 +5,14 @@ import Sidebar from './components/Sidebar.jsx'
 import MessageArea from './components/MessageArea.jsx'
 import InputBar from './components/InputBar.jsx'
 import Login from './components/Login.jsx'
-import { sendMessage } from './services/chatService.js'
+import { sendMessage, warmupBackend } from './services/chatService.js'
 
 
 export default function App() {
+  useEffect(() => {
+    warmupBackend()
+  }, [])
+
   const [messages, setMessages] = useState([])
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [authLoading, setAuthLoading] = useState(true)
@@ -189,7 +193,7 @@ useEffect(() => {
   setIsLoading(true)
 
   try {
-    const response = await sendMessage(text)
+    const response = await sendMessage(text, chatId)
 
     const assistantMessage = {
       role: 'assistant',
@@ -232,6 +236,7 @@ useEffect(() => {
     try {
       const response = await sendMessage(
         previousUserMessage.text,
+        activeChatId,
       )
 
       const updatedMessages = messages.map(
