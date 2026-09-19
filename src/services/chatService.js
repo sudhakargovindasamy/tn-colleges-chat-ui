@@ -30,8 +30,16 @@ export async function warmupBackend() {
   } catch (_) {}
 }
 
-export async function sendMessage(question, sessionId) {
-  const activeSessionId = sessionId ? String(sessionId) : getSessionId();
+export async function sendMessage(question) {
+  // Generate a fresh session ID per request to keep queries fast (~2s)
+  // and prevent Render free-tier (512MB RAM) from crashing due to history re-writing
+  const activeSessionId =
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `query-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 50000);
 
   try {
     // Call FastAPI /query endpoint with required schema fields
@@ -40,6 +48,7 @@ export async function sendMessage(question, sessionId) {
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
       body: JSON.stringify({
         question: question,
         session_id: activeSessionId,
@@ -77,6 +86,16 @@ export async function sendMessage(question, sessionId) {
   } catch (error) {
     console.error('Chat service error:', error);
 
+    // Timeout triggered
+    if (error.name === 'AbortError') {
+      return {
+        status: 'no-results',
+        answer:
+          'Request timed out waiting for the server. The free-tier backend is currently under load or restarting. Please try again in a few seconds.',
+        sources: [],
+      };
+    }
+
     // Render free-tier cold start — service needs ~30-60s to wake up
     if (error.message === 'COLD_START') {
       return {
@@ -104,5 +123,7 @@ export async function sendMessage(question, sessionId) {
         'Sorry, I could not connect to the college database. Please check your internet connection or try again shortly.',
       sources: [],
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

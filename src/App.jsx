@@ -193,7 +193,7 @@ useEffect(() => {
   setIsLoading(true)
 
   try {
-    const response = await sendMessage(text, chatId)
+    const response = await sendMessage(text)
 
     const assistantMessage = {
       role: 'assistant',
@@ -236,7 +236,6 @@ useEffect(() => {
     try {
       const response = await sendMessage(
         previousUserMessage.text,
-        activeChatId,
       )
 
       const updatedMessages = messages.map(
