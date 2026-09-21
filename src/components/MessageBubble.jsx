@@ -35,9 +35,9 @@ export default function MessageBubble({
         </p>
 
         <div className="border-l-2 border-ledger-brass pl-4">
-          <p className="font-serif text-[15px] leading-relaxed text-ledger-ink">
+          <div className="font-serif text-[15px] leading-relaxed text-ledger-ink whitespace-pre-wrap">
             {text}
-          </p>
+          </div>
 
           <SourceReferences sources={sources} />
 

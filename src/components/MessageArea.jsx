@@ -5,7 +5,7 @@ import StatusMessage from './StatusMessage.jsx'
 const suggestedQuestions = [
   'Which colleges in Chennai offer Computer Science Engineering?',
   'List all autonomous colleges in Coimbatore with NAAC A grade',
-  'What is the total intake for NIT Trichy across all branches?',
+  'What is the total intake for PSG College of Technology across all branches?',
 ]
 
 export default function MessageArea({
