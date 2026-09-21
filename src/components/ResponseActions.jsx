@@ -3,17 +3,22 @@ import {
   Copy,
   Check,
   ThumbsUp,
+  ThumbsDown,
   Share,
   RotateCcw,
   MoreHorizontal,
 } from 'lucide-react'
+import { downvoteAnswer } from '../services/chatService.js'
 
 export default function ResponseActions({
   text,
+  queryText,
   onRegenerate,
 }) {
   const [copied, setCopied] = useState(false)
   const [liked, setLiked] = useState(false)
+  const [disliked, setDisliked] = useState(false)
+  const [feedbackNotice, setFeedbackNotice] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef(null)
 
@@ -39,9 +44,7 @@ export default function ResponseActions({
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(text)
-
     setCopied(true)
-
     setTimeout(() => {
       setCopied(false)
     }, 2000)
@@ -49,6 +52,21 @@ export default function ResponseActions({
 
   const handleLike = () => {
     setLiked((prev) => !prev)
+    if (disliked) setDisliked(false)
+  }
+
+  const handleDislike = async () => {
+    if (disliked) return
+    setDisliked(true)
+    if (liked) setLiked(false)
+
+    // Call POST /feedback/downvote to purge bad cache on backend
+    const questionToPurge = queryText || text
+    await downvoteAnswer(questionToPurge)
+    setFeedbackNotice(true)
+    setTimeout(() => {
+      setFeedbackNotice(false)
+    }, 3000)
   }
 
   const handleShare = async () => {
@@ -86,7 +104,7 @@ export default function ResponseActions({
       <button
         type="button"
         onClick={handleLike}
-        title="Helpful"
+        title="Helpful response"
         className={
           liked
             ? 'text-ledger-brass'
@@ -95,6 +113,26 @@ export default function ResponseActions({
       >
         <ThumbsUp size={18} />
       </button>
+
+      {/* Downvote & Purge Cache button (POST /feedback/downvote) */}
+      <button
+        type="button"
+        onClick={handleDislike}
+        title="Inaccurate response (purges cache)"
+        className={
+          disliked
+            ? 'text-red-500'
+            : 'transition hover:text-red-500'
+        }
+      >
+        <ThumbsDown size={18} />
+      </button>
+
+      {feedbackNotice && (
+        <span className="text-[11px] font-medium text-emerald-600 animate-fade-in">
+          Feedback recorded, cache cleared!
+        </span>
+      )}
 
       <button
         type="button"

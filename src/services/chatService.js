@@ -30,6 +30,81 @@ export async function warmupBackend() {
   } catch (_) {}
 }
 
+/**
+ * Check backend health status (GET /health).
+ */
+export async function checkHealth() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/health`, { method: 'GET', mode: 'cors' });
+    if (res.ok) {
+      const data = await res.json();
+      return { healthy: true, version: data.version || '2.0-production', features: data.features || [] };
+    }
+    return { healthy: false, version: null, features: [] };
+  } catch (_) {
+    return { healthy: false, version: null, features: [] };
+  }
+}
+
+/**
+ * Reset backend conversational context for a given session (POST /clear_chat/{session_id}).
+ */
+export async function clearChatMemory(sessionId) {
+  if (!sessionId) return;
+  try {
+    await fetch(`${API_BASE_URL}/clear_chat/${encodeURIComponent(sessionId)}`, {
+      method: 'POST',
+      mode: 'cors',
+    });
+  } catch (err) {
+    console.warn('Failed to clear backend chat memory:', err);
+  }
+}
+
+/**
+ * Report an inaccurate response to purge poisoned semantic cache (POST /feedback/downvote).
+ */
+export async function downvoteAnswer(question) {
+  if (!question) return { success: false };
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/feedback/downvote?question=${encodeURIComponent(question)}`,
+      { method: 'POST', mode: 'cors' }
+    );
+    return { success: res.ok };
+  } catch (err) {
+    console.warn('Downvote feedback error:', err);
+    return { success: false };
+  }
+}
+
+/**
+ * Direct college directory and catalog filter search (GET /search_colleges).
+ */
+export async function searchColleges({ district, branch_code, has_hostel = false, autonomous, limit = 15 } = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (district) params.append('district', district);
+    if (branch_code) params.append('branch_code', branch_code);
+    if (has_hostel) params.append('has_hostel', 'true');
+    if (autonomous !== undefined && autonomous !== null) params.append('autonomous', String(autonomous));
+    params.append('limit', String(limit));
+
+    const res = await fetch(`${API_BASE_URL}/search_colleges?${params.toString()}`, {
+      method: 'GET',
+      mode: 'cors',
+    });
+    if (!res.ok) {
+      throw new Error(`Catalog search failed: ${res.status}`);
+    }
+    const data = await res.json();
+    return { count: data.count || 0, results: data.results || [] };
+  } catch (err) {
+    console.error('Directory search error:', err);
+    return { count: 0, results: [] };
+  }
+}
+
 export async function sendMessage(question) {
   // Generate a fresh session ID per request to keep queries fast (~2s)
   // and prevent Render free-tier (512MB RAM) from crashing due to history re-writing

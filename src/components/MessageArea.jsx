@@ -32,6 +32,7 @@ export default function MessageArea({
                 key={i}
                 role={m.role}
                 text={m.text}
+                queryText={i > 0 && messages[i - 1]?.role === 'user' ? messages[i - 1].text : ''}
                 sources={m.sources}
                 onRegenerate={() => onRegenerate(i)}
               />

@@ -4,6 +4,7 @@ import ResponseActions from './ResponseActions.jsx'
 export default function MessageBubble({
   role,
   text,
+  queryText,
   sources = [],
   onRegenerate,
 }) {
@@ -43,6 +44,7 @@ export default function MessageBubble({
 
           <ResponseActions
             text={text}
+            queryText={queryText}
             onRegenerate={onRegenerate}
           />
         </div>

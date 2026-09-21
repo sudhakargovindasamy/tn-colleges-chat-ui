@@ -5,7 +5,8 @@ import Sidebar from './components/Sidebar.jsx'
 import MessageArea from './components/MessageArea.jsx'
 import InputBar from './components/InputBar.jsx'
 import Login from './components/Login.jsx'
-import { sendMessage, warmupBackend } from './services/chatService.js'
+import CollegeExplorerModal from './components/CollegeExplorerModal.jsx'
+import { sendMessage, warmupBackend, clearChatMemory } from './services/chatService.js'
 
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
   const [activeChatId, setActiveChatId] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [isExplorerOpen, setIsExplorerOpen] = useState(false)
 
   const chatRef = useRef(null)
   const getChatIdFromUrl = () => {
@@ -276,6 +278,9 @@ useEffect(() => {
 }
 
  const handleNewChat = () => {
+  if (activeChatId) {
+    clearChatMemory(activeChatId)
+  }
   setMessages([])
   setActiveChatId(null)
   setIsLoading(false)
@@ -313,6 +318,8 @@ useEffect(() => {
 
   const handleDeleteChat = async (chatId) => {
     if (!user) return
+
+    clearChatMemory(chatId)
 
     setChats((prev) =>
       prev.filter(
@@ -415,7 +422,7 @@ useEffect(() => {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header />
+        <Header onOpenExplorer={() => setIsExplorerOpen(true)} />
 
         <main
           ref={chatRef}
@@ -434,6 +441,12 @@ useEffect(() => {
           isLoading={isLoading}
         />
       </div>
+
+      <CollegeExplorerModal
+        isOpen={isExplorerOpen}
+        onClose={() => setIsExplorerOpen(false)}
+        onSelectCollege={handleSend}
+      />
     </div>
   )
 }

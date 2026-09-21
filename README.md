@@ -126,15 +126,14 @@ npm run preview
 
 The frontend communicates with the **TNEA AI Counselor API** via `src/services/chatService.js`:
 
-* **`POST /query`**: Submits user questions with session tracking:
-  ```json
-  {
-    "question": "Which colleges in Coimbatore offer Computer Science?",
-    "session_id": "user-uuid",
-    "top_k": 5
-  }
-  ```
-* **`GET /warmup`**: Proactively sent on app load to wake up free-tier backend instances and prevent cold-start delays.
+| Endpoint | Method | Frontend Feature | Description |
+| :--- | :---: | :--- | :--- |
+| **`/query`** | `POST` | AI Chat Assistant | Submits student questions with session tracking, returning grounded answers and verified sources. |
+| **`/health`** | `GET` | Live Connection Badge | Displays real-time connection status (`● Online` / `⏳ Connecting...`) in the header. |
+| **`/warmup`** | `GET` | Cold-Start Preload | Proactively wakes up free-tier backend instances on app mount to avoid query latency. |
+| **`/search_colleges`** | `GET` | Directory Explorer Modal | Interactive catalog search filtering by district, branch/course, and autonomous status. |
+| **`/clear_chat/{session_id}`** | `POST` | New Chat & Delete | Resets conversational history on the backend when starting a new session or deleting a thread. |
+| **`/feedback/downvote`** | `POST` | Thumbs Down Action | Allows users to report inaccurate answers, automatically purging poisoned semantic cache entries. |
 
 ---
 
