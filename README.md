@@ -1,40 +1,143 @@
-# TN Colleges — AI Chat Assistant
+# 🎓 TN Colleges — AI Chat Assistant
 
-An AI-powered chat application for exploring Tamil Nadu engineering colleges.
+An elegant, production-ready AI chat interface for Tamil Nadu Engineering Admissions (TNEA) counseling, powered by the **TNEA AI Counselor RAG System**.
 
-The application allows users to ask questions about colleges and receive AI-generated responses through the TN Colleges RAG system.
+Students can ask natural-language questions about **418 engineering colleges**, **3,516 department offerings and seat intakes**, cutoff guidance, hostel facilities, fees, and Anna University academic performance.
 
-## Features
+---
 
-- AI-powered college assistant
-- Ask questions about Tamil Nadu engineering colleges
-- Suggested questions
-- Persistent chat history
-- Search chat history
-- Rename chats
-- Delete chats
-- Pin chats
-- Regenerate AI responses
-- Google Sign-In
-- User profile
-- Account Settings
-- User-specific chat history
-- Secure chat storage with Supabase
-- Restore the active conversation after refresh or browser-tab switching
+## 🚀 Features
 
-## Tech Stack
+* **AI-Powered Counselor Chat:** Connects directly to the FastAPI RAG backend (`/query`) for grounded answers with verified college source cards.
+* **Persistent Chat History:** User conversations are securely saved to Supabase with real-time restore on page reload or device switching.
+* **Google Authentication:** Secure login & session management via Supabase Auth.
+* **Chat Management:** Full sidebar control to create, rename, pin, search, and delete chat threads.
+* **Source Citations:** Visual source badges showing College Name, District, and official TNEA Code.
+* **Free-Tier Cold-Start Awareness:** Automatic background warmup ping (`GET /warmup`) on app mount with friendly countdown notices during backend wake-up.
+* **Regenerate Responses:** One-click answer regeneration with query re-submission.
+* **Responsive Ledger Design:** Minimalist, mobile-friendly interface styled with Tailwind CSS.
 
-- React
-- Vite
-- Tailwind CSS
-- Supabase
-- Lucide React
-- React Icons
+---
 
-## Setup
+## 🛠️ Tech Stack
 
-### 1. Clone the repository
+| Component | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Framework** | [React 18](https://react.dev/) | Component architecture & state management |
+| **Build Tool** | [Vite 5](https://vitejs.dev/) | Fast development server & optimized production bundling |
+| **Styling** | [Tailwind CSS 3](https://tailwindcss.com/) | Responsive design & custom ledger theme |
+| **Backend & Auth** | [Supabase Client](https://supabase.com/) | Authentication & user chat persistence |
+| **Icons** | [Lucide React](https://lucide.dev/) & [React Icons](https://react-icons.github.io/react-icons/) | Modern UI icons |
+| **RAG Backend** | [FastAPI](https://fastapi.tiangolo.com/) + Gemini | AI counseling and retrieval engine |
+
+---
+
+## 📦 Project Structure
+
+```text
+chat-ui/
+├── src/
+│   ├── components/
+│   │   ├── AccountSettings.jsx     # User profile and account preferences
+│   │   ├── Header.jsx              # App header with connection & user controls
+│   │   ├── InputBar.jsx            # Multi-line chat input with keyboard shortcuts
+│   │   ├── LoadingIndicator.jsx    # Pulsing query status indicator
+│   │   ├── Login.jsx               # Google authentication modal
+│   │   ├── MessageArea.jsx         # Chat timeline and suggested questions
+│   │   ├── MessageBubble.jsx       # User query & AI response bubble with formatted text
+│   │   ├── ResponseActions.jsx     # Copy, regenerate, and feedback actions
+│   │   ├── Sidebar.jsx             # Chat drawer with search, pin, rename, delete
+│   │   ├── SourceReferences.jsx    # Grounded citation cards (TNEA code, district)
+│   │   └── StatusMessage.jsx       # Friendly notice banners (cold starts, errors)
+│   ├── services/
+│   │   ├── chatService.js          # API client for FastAPI backend (/query, /warmup)
+│   │   └── supabase.js             # Supabase client & auth configuration
+│   ├── App.jsx                     # Root application container & auth lifecycle
+│   ├── main.jsx                    # Vite React entry point
+│   └── index.css                   # Global styles & Tailwind utilities
+├── index.html                      # HTML entry document
+├── package.json                    # Project dependencies & scripts
+├── tailwind.config.js              # Theme color definitions & font setup
+├── vite.config.js                  # Vite configuration
+└── README.md                       # Project documentation
+```
+
+---
+
+## ⚙️ Getting Started
+
+### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
-cd chat-ui
+git clone https://github.com/sudhakargovindasamy/tn-colleges-chat-ui.git
+cd tn-colleges-chat-ui
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+# Supabase Configuration (Authentication & Chat Persistence)
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# Backend API Endpoint
+# Production (Render):
+VITE_API_URL=https://tnea-ai-eng.onrender.com
+
+# For Local Backend Development:
+# VITE_API_URL=http://localhost:8000
+```
+
+### 4. Run Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+---
+
+## 🏗️ Production Build
+
+To bundle the application for production deployment (Vercel, Netlify, Cloudflare Pages, etc.):
+
+```bash
+npm run build
+```
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+---
+
+## 🔗 Backend RAG Integration
+
+The frontend communicates with the **TNEA AI Counselor API** via `src/services/chatService.js`:
+
+* **`POST /query`**: Submits user questions with session tracking:
+  ```json
+  {
+    "question": "Which colleges in Coimbatore offer Computer Science?",
+    "session_id": "user-uuid",
+    "top_k": 5
+  }
+  ```
+* **`GET /warmup`**: Proactively sent on app load to wake up free-tier backend instances and prevent cold-start delays.
+
+---
+
+## 📄 License
+
+MIT License. Designed for Tamil Nadu engineering aspirants.
