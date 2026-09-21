@@ -226,3 +226,4 @@ export default function CollegeExplorerModal({ isOpen, onClose, onSelectCollege 
     </div>
   )
 }
+
