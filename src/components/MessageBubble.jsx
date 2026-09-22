@@ -2,9 +2,10 @@ import { FileDown, ExternalLink } from 'lucide-react'
 import SourceReferences from './SourceReferences.jsx'
 import ResponseActions from './ResponseActions.jsx'
 
-const API_BASE_URL =
+const RAW_API_URL =
   import.meta.env.VITE_API_URL ||
   (import.meta.env.PROD ? 'https://tnea-ai-eng.onrender.com' : 'http://localhost:8000')
+const API_BASE_URL = RAW_API_URL.replace(/\/+$/, '')
 
 function renderFormattedText(text) {
   if (!text) return null

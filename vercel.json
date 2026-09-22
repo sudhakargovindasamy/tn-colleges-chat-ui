@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/export/:path*",
+      "destination": "https://tnea-ai-eng.onrender.com/export/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
